@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Геолокация</title>
+</head>
+<body>
+    <h1>Отслеживание местоположения</h1>
+    <p id="location">Определяем местоположение...</p>
+
+    <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                document.getElementById("location").innerHTML = "Геолокация не поддерживается вашим браузером.";
+            }
+        }
+
+        function showPosition(position) {
+            let lat = position.coords.latitude;
+            let lon = position.coords.longitude;
+            document.getElementById("location").innerHTML = `Ваше местоположение: Широта: ${lat}, Долгота: ${lon}`;
+        }
+
+        function showError(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    document.getElementById("location").innerHTML = "Пользователь отклонил запрос на геолокацию.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    document.getElementById("location").innerHTML = "Информация о местоположении недоступна.";
+                    break;
+                case error.TIMEOUT:
+                    document.getElementById("location").innerHTML = "Запрос на определение местоположения истёк.";
+                    break;
+                case error.UNKNOWN_ERROR:
+                    document.getElementById("location").innerHTML = "Произошла неизвестная ошибка.";
+                    break;
+            }
+        }
+
+        getLocation();
+    </script>
+</body>
+</html>
